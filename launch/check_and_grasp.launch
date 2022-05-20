@@ -1,0 +1,6 @@
+<?xml version="1.0" ?>
+<!-- 同时启动机械臂状态检查和抓取执行 -->
+<launch>
+  <node name="panda_state_checker" pkg="panda_go_grasp" type="get_panda_state.py"  output="screen"/>
+  <node name="panda_grasp" pkg="panda_go_grasp" type="panda_grasp.py"  output="screen"/>  
+</launch>
