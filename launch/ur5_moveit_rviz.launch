@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<launch>
+
+  <arg name="rviz_config" default="$(find ur5_moveit_config)/launch/moveit.rviz" />
+
+  <!-- 启动movegroup等 -->
+  <include file="$(find ur5_moveit_config)/launch/ur5_moveit_planning_execution.launch"/>
+  <!-- 启动rviz&moveit GUI 节点 -->
+  <include file="$(find ur5_moveit_config)/launch/moveit_rviz.launch">
+    <arg name="rviz_config" value="$(arg rviz_config)" />
+  </include>
+
+
+ 
+</launch>

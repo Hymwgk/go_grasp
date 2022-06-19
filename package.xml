@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>ur5_go_grasp</name>
+  <name>go_grasp</name>
   <version>0.0.0</version>
-  <description>The panda_go_grasp package</description>
+  <description>The go_grasp package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
   <!-- <maintainer email="jane.doe@example.com">Jane Doe</maintainer> -->
-  <maintainer email="wgk@todo.todo">wgk</maintainer>
+  <maintainer email="abcwgk@gmail.com">wgk_ZZU</maintainer>
 
 
   <!-- One license tag required, multiple allowed, one license per tag -->

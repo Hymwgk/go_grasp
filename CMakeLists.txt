@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(ur5_go_grasp)
+project(go_grasp)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -159,8 +159,7 @@ include_directories(
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
 catkin_install_python(PROGRAMS
-   scripts/get_panda_state.py
-   scripts/ur5_grasp.py
+   scripts/go_grasp.py
    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

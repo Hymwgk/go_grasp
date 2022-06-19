@@ -1,5 +1,27 @@
 <?xml version="1.0" ?>
-<!-- 接收末端执行器姿态执行抓取-->
 <launch>
-  <node name="panda_grasp" pkg="panda_go_grasp" type="panda_grasp.py"  output="screen"/>  
+
+  <arg name="robot_name"           default="ur5"/>    
+  <arg name="move_group_name"      default="manipulator"/>
+  <arg name="base_frame"           default="base_link"/>
+  <arg name="grasp_list_topic"     default="/yolov5/detection_grasps"/>
+  <arg name="grasp_father_frame"   default="camera_color_optical_frame"/>
+  <arg name="gte_config_path"      default="$(find go_grasp)/config/ur5/gripper/AG95/GTE.tf"/>
+  <arg name="lte_config_path"      default="$(find go_grasp)/config/ur5/gripper/AG95/LTE.tf"/>
+  <arg name="arm_config_path"      default="$(find go_grasp)/config/ur5/armConfig.yaml"/>
+  <arg name="mode"                 default="run"/>
+
+
+  <!-- Start go_grasp and ros wrapper -->
+  <node pkg="go_grasp" type="go_grasp.py" name="go_grasp" output="screen" >
+    <param name="robot_name"           type="str"   value="$(arg robot_name)"/>
+    <param name="move_group_name"      type="str"   value="$(arg move_group_name)"/>
+    <param name="base_frame"           type="str"   value="$(arg base_frame)"/>
+    <param name="grasp_list_topic"     type="str"   value="$(arg grasp_list_topic)"/>
+    <param name="grasp_father_frame"   type="str"   value="$(arg grasp_father_frame)"/>
+    <param name="gte_config_path"      type="str"   value="$(arg gte_config_path)"/>
+    <param name="lte_config_path"      type="str"   value="$(arg lte_config_path)"/>
+    <param name="arm_config_path"      type="str"   value="$(arg arm_config_path)"/>
+    <param name="mode"                 type="str"   value="$(arg mode)"/>
+  </node>
 </launch>
