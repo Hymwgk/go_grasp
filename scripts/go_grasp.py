@@ -42,9 +42,9 @@ from autolab_core import RigidTransform
 #from franka_gripper.msg import GraspAction, GraspGoal
 #from franka_gripper.msg import GraspEpsilon
 #解析命令行参数
-parser = argparse.ArgumentParser(description='Go grasp')
-parser.add_argument('--test',type=int, default=1)  #设置同时处理几个场景
-parameters,unknow =parser.parse_known_args()
+#parser = argparse.ArgumentParser(description='Go grasp')
+#parser.add_argument('--test',type=int, default=1)  #设置同时处理几个场景
+#parameters,unknow =parser.parse_known_args()
 
 
 
@@ -77,7 +77,7 @@ class GoGrasp:
         #机械臂配置参数文件地址
         arm_config_path = rospy.get_param('~arm_config_path', os.path.join(current_path,'config/ur5/armConfig.yaml'))
         #获得模式，默认测试模式
-        mode = rospy.get_param('~mode', 'run')
+        mode = rospy.get_param('~mode', 'test')
 
 
         #先从从 yaml读取关于机械臂的配置参数,[({参数名，参数值},命名空间),(),...]
@@ -92,8 +92,11 @@ class GoGrasp:
         self.retreat = rospy.get_param(robot_name+'/retreat', '0.15')
         self.max_acceleration_scaling_factor = rospy.get_param(robot_name+'/max_acceleration_scaling_factor', '0.1')
         self.max_velocity_scaling_factor = rospy.get_param(robot_name+'/max_velocity_scaling_factor', '0.2')
+
         self.initial_joints = rospy.get_param(robot_name+'/initial_joints', '')
-        self.ready_joints = rospy.get_param(robot_name+'/ready_joints', '')
+
+        self.working_joints = rospy.get_param(robot_name+'/working_joints', '')
+        self.place_joints = rospy.get_param(robot_name+'/place_joints', '')
 
 
 
@@ -169,12 +172,12 @@ class GoGrasp:
         self.robot_arm.allow_replanning(False)
         self.robot_arm.set_planning_time(5)
         
-        #移动到home
-        self.move_to_joints(self.robot_arm,self.ready_joints,tag="ready pose")
+        #移动到工作姿态
+        self.move_to_joints(self.robot_arm,self.working_joints,tag="working pose")
         #张开夹爪
         #self.set_gripper(0.078,epsilon=0.01)#张开8cm
         rospy.set_param("/robot_state", "ready")
-        rospy.loginfo("Ready to grasp, initial pose")
+        rospy.loginfo("Ready to grasp, working pose")
 
         ######################开始等待接收夹爪姿态#########################
         rospy.loginfo("Waiting for gripper pose")
@@ -257,7 +260,7 @@ class GoGrasp:
             #self.set_gripper(0.01,epsilon=0.4)#张开3cm
             rospy.sleep(1)
 
-            ####################抓取完后撤####################
+            ####################返回到预备抓取状态####################
             waypoints = []
             wpose=self.robot_arm.get_current_pose().pose
             wpose.position.x=  self.pre_grasp_pose_wrist3.position.x
@@ -278,18 +281,28 @@ class GoGrasp:
             #执行,并等待后撤成功
             new_plan=self.scale_trajectory_speed(plan,0.6)
             self.robot_arm.execute(new_plan,wait=True)
+            ######################移动到工作状态############################
+            self.move_to_joints(self.robot_arm,self.working_joints,tag="working pose")
+            #self.set_gripper(0.08,epsilon=0.4)#张开8cm
+            rospy.loginfo("Working  pose")
 
-            ######################移动到预备姿态############################
-            self.move_to_joints(self.robot_arm,self.ready_joints,tag="ready pose")
+            #########################移动放到放置状态#######################
+            self.move_to_joints(self.robot_arm,self.place_joints,tag="place pose")
+            #self.set_gripper(0.08,epsilon=0.4)#张开8cm
+            rospy.loginfo("place  pose")
+            rospy.sleep(1)
+            ######################移动到工作状态############################
+            self.move_to_joints(self.robot_arm,self.working_joints,tag="working pose")
             #self.set_gripper(0.08,epsilon=0.4)#张开8cm
             rospy.set_param("/robot_state", "ready")
-            rospy.loginfo("Ready to grasp, ready pose")
+            rospy.loginfo("Ready to grasp, working pose")
             rospy.sleep(2)
 
             if mode=='test':#测试模式
                 self.callback_done=True
+                self.No_grasp = False
                 rospy.set_param("/robot_state", "moving")
-                self.move_to_joints(self.robot_arm,self.initial_joints)
+                self.move_to_joints(self.robot_arm,self.working_joints,tag="working pose")
                 rospy.set_param("/robot_state", "ready")
 
 
@@ -526,6 +539,7 @@ class GoGrasp:
 
         #标志回调函数处理完毕
         self.callback_done=True 
+        self.No_grasp = False
 
 
     def scale_trajectory_speed(self,traj,spd=0.1):
